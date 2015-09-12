@@ -44808,21 +44808,21 @@ module.exports = NotFoundPage;
 var React = require('react');
 
 var About = React.createClass({displayName: "About",
-		statics: {
-			willTransitionTo: function(transition, params, query, callback) {
-				if (!confirm('Are you sure you want to read a page that\'s this boring?')) {
-						transition.about();	
-				} else {
-					callback();
-				}		
-			},
+		// statics: {
+		// 	willTransitionTo: function(transition, params, query, callback) {
+		// 		if (!confirm('Are you sure you want to read a page that\'s this boring?')) {
+		// 				transition.about();	
+		// 		} else {
+		// 			callback();
+		// 		}		
+		// 	},
 
-			willTransitionFrom: function(transition, component) {
-				if (!confirm('Are you sure you want to leave a page that\'s this exciting?')) {
-						transition.about();	
-				} 
-			}
-		},
+		// 	willTransitionFrom: function(transition, component) {
+		// 		if (!confirm('Are you sure you want to leave a page that\'s this exciting?')) {
+		// 				transition.about();	
+		// 		} 
+		// 	}
+		// },
 
 		render: function() {
 			return (
@@ -44998,14 +44998,23 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
 	mixins: [
 		Router.Navigation
 	],
+	statics: {
+		willTransitionFrom: function(transition, component) {
+			if (component.state.dirty && !confirm('Leave without saving?')) {
+				transition.abort();	
+			}
+		}
+	},
 	getInitialState: function() {
 		return {
 			author: { id: '', firstName: '', lastName: '' },
-			errors: {}
+			errors: {},
+			dirty: false
 		};
 	},
 
 	setAuthorState: function(e) {
+		this.setState({ dirty: true });
 		var field = e.target.name;
 		var value = e.target.value;
 		this.state.author[field] = value;
@@ -45039,6 +45048,7 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
 		}
 
 		AuthorApi.saveAuthor(this.state.author);
+		this.setState({ dirty: false });
 		toastr.success('Author Saved');
 		this.transitionTo('authors');
 	},
